@@ -1,25 +1,23 @@
 ---
-import '../styles/global.css';
 // Component Imports
-import Button from '../components/Button.astro';
-
-// Full Astro Component Syntax:
-// https://docs.astro.build/basics/astro-components/
+import { OvaCard } from "@/components/card/ova-card";
+import BaseLayout from "../layouts/main.astro";
+import { Filter } from "@/components/filter/filter";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro + TailwindCSS</title>
-	</head>
-
-	<body>
-		<div class="grid place-items-center h-screen content-center">
-			<Button>Tailwind Button in Astro!</Button>
-			<a href="/markdown-page" class="p-4 underline">Markdown is also supported...</a>
-		</div>
-	</body>
-</html>
+<BaseLayout
+  title="Astro + Tailwind CSS + Radix UI"
+  description="Astro + Tailwind CSS + Radix UI"
+>
+  <section class="w-full h-full grid grid-rows-[auto_1fr] gap-2.5 border-2 border-yellow-500">
+    <Filter client:idle />
+    <div class="container-grid container-border px-3 py-2.5">
+      <OvaCard />
+      <OvaCard />
+      <OvaCard />
+      <OvaCard />
+      <OvaCard />
+      <OvaCard />
+    </div>
+  </section>
+</BaseLayout>

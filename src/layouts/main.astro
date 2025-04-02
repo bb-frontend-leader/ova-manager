@@ -1,16 +1,25 @@
 ---
-import '../styles/global.css';
-const { content } = Astro.props;
+import Background from "@/components/Background.astro";
+import Header from "@/components/layout/Header.astro";
+import "../styles/global.css";
+
+const { title } = Astro.props;
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<title>{content.title}</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="relative min-h-screen w-full bg-main grid grid-rows-[auto_1fr_auto] gap-3.5">
+    <Header />
+    <main
+      class="container mx-auto h-full w-[min(100%-1rem,150ch)] border-2 border-red-500"
+    >
+      <slot />
+    </main>
+    <footer>Footer</footer>
+  </body>
 </html>

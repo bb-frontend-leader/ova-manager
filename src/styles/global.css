@@ -3,10 +3,10 @@
 @config "../../tailwind.config.ts";
 
 :root {
-  --main: #88aaee;
+  --main: #FD9745;
   --overlay: rgba(0, 0, 0, 0.8); /* background color overlay for alert dialogs, modals, etc. */
 
-  --bg: #dfe5f2;
+  --bg: #fff4e0;
   --bw: #fff; /* white and secondary black e.g. utility class variant would be: bg-[#fff] dark:bg-[#212121] */
   --blank: #000; /* blank black and white */
   --border: #000;
@@ -16,9 +16,9 @@
   --ring-offset: #fff;
 
   --border-radius: 5px;
-  --box-shadow-x: 4px;
+  --box-shadow-x: -6px;
   --box-shadow-y: 4px;
-  --reverse-box-shadow-x: -4px;
+  --reverse-box-shadow-x: 6px;
   --reverse-box-shadow-y: -4px;
   --base-font-weight: 500;
   --heading-font-weight: 700;
@@ -47,3 +47,4 @@
 .container-grid {
   @apply grid place-content-start grid-cols-[repeat(auto-fit,_minmax(min(100%,_30ch),_1fr))] gap-3.5;
 }
+

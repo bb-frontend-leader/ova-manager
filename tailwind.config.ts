@@ -29,9 +29,9 @@ export default {
         shadow: 'var(--shadow)'
       },
       translate: {
-        boxShadowX: '4px',
+        boxShadowX: '-6px',
         boxShadowY: '4px',
-        reverseBoxShadowX: '-4px',
+        reverseBoxShadowX: '6px',
         reverseBoxShadowY: '-4px',
       },
       fontWeight: {

@@ -3,21 +3,27 @@
 import { OvaCard } from "@/components/card/ova-card";
 import BaseLayout from "../layouts/main.astro";
 import { Filter } from "@/components/filter/filter";
+import { SearchBar } from "@/components/search-bar/search-bar";
+import ImageCard from "@/components/card/ImageCard.astro";
 ---
 
-<BaseLayout
-  title="Astro + Tailwind CSS + Radix UI"
-  description="Astro + Tailwind CSS + Radix UI"
->
-  <section class="w-full h-full grid grid-rows-[auto_1fr] gap-2.5 border-2 border-yellow-500">
-    <Filter client:idle />
-    <div class="container-grid container-border px-3 py-2.5">
-      <OvaCard />
-      <OvaCard />
-      <OvaCard />
-      <OvaCard />
-      <OvaCard />
-      <OvaCard />
+<BaseLayout title="200 OVAS 2025 📚" description="Project 200 OVAS 2025">
+  <section class="w-full h-full grid grid-rows-[auto_1fr] gap-2.5">
+    <Filter client:idle>
+      <SearchBar client:idle />
+    </Filter>
+
+    <div
+      class="container-grid container-border px-10 py-8 not-prose z-[15] relative bg-[radial-gradient(#80808080_1px,transparent_1px)] shadow-light dark:shadow-dark [background-size:16px_16px]"
+    >
+      <OvaCard>
+        <ImageCard
+          src="https://demos.booksandbooksdigital.com.co/200-ovas-2025/ova-14/assets/base/cover.webp"
+          alt="OVA"
+          width="200"
+          height="300"
+        />
+      </OvaCard>
     </div>
   </section>
 </BaseLayout>

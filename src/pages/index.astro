@@ -5,25 +5,47 @@ import BaseLayout from "../layouts/main.astro";
 import { Filter } from "@/components/filter/filter";
 import { SearchBar } from "@/components/search-bar/search-bar";
 import ImageCard from "@/components/card/ImageCard.astro";
+import { OvaService } from "@/services/ova-service";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ServerCrash } from "lucide-react";
+
+const ovaService = new OvaService("http://localhost:3001/api/ovas");
+const ovas = await ovaService.fetchOvas();
 ---
 
 <BaseLayout title="200 OVAS 2025 📚" description="Project 200 OVAS 2025">
   <section class="w-full h-full grid grid-rows-[auto_1fr] gap-2.5">
-    <Filter client:idle>
-      <SearchBar client:idle />
+    <Filter client:load>
+      <SearchBar client:load />
     </Filter>
 
-    <div
-      class="container-grid container-border px-10 py-8 not-prose z-[15] relative bg-[radial-gradient(#80808080_1px,transparent_1px)] shadow-light dark:shadow-dark [background-size:16px_16px]"
-    >
-      <OvaCard>
-        <ImageCard
-          src="https://demos.booksandbooksdigital.com.co/200-ovas-2025/ova-14/assets/base/cover.webp"
-          alt="OVA"
-          width="200"
-          height="300"
-        />
-      </OvaCard>
-    </div>
+    {
+      !ovas.success && (
+        <div class="container-border h-fit px-10 py-8 not-prose z-[15] relative bg-[radial-gradient(#80808080_1px,transparent_1px)] shadow-light dark:shadow-dark [background-size:16px_16px]">
+          <Alert >
+            <ServerCrash className="h-6 w-6 inline-flex justify-center items-center" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{ovas.message}</AlertDescription>
+          </Alert>
+        </div>
+      )
+    }
+
+    {
+      ovas.success && (
+        <div class="container-grid container-border px-10 py-8 not-prose z-[15] relative bg-[radial-gradient(#80808080_1px,transparent_1px)] shadow-light dark:shadow-dark [background-size:16px_16px]">
+          {ovas.data.map((ova) => (
+            <OvaCard ova={ova}>
+              <ImageCard
+                src="https://demos.booksandbooksdigital.com.co/200-ovas-2025/ova-14/assets/base/cover.webp"
+                alt={ova.title}
+                width="200"
+                height="300"
+              />
+            </OvaCard>
+          ))}
+        </div>
+      )
+    }
   </section>
 </BaseLayout>

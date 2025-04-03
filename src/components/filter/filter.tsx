@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 
 import { ChevronDown, Funnel, X } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
+import { EVENTS } from "@/utils/conts";
 
 const FILTER_CATEGORIES = [
   {
@@ -62,6 +63,28 @@ interface Props {
 
 export const Filter: React.FC<Props> = ({ children }) => {
   const [showFilter, setShowFilter] = useState<boolean>(false);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+
+  const toggleFilter = (filter: string) => {
+    if (selectedFilters.includes(filter)) {
+      setSelectedFilters(selectedFilters.filter((f) => f !== filter));
+    } else {
+      setSelectedFilters([...selectedFilters, filter]);
+    }
+    dispatchEventFilter(EVENTS.FILTER);
+  };
+
+  const clearFilters = () => {
+    setSelectedFilters([]);
+    dispatchEventFilter(EVENTS.FILTER_CLEAR);
+  };
+
+  const dispatchEventFilter = (eventName: string) => {
+    const event = new CustomEvent(eventName, {
+      detail: selectedFilters,
+    });
+    window.dispatchEvent(event);
+  }
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -97,10 +120,17 @@ export const Filter: React.FC<Props> = ({ children }) => {
           >
             <div className="flex justify-between items-center pb-2">
               <h2 className="text-xl font-bold">Filter OVAs</h2>
-              <Button size="sm" className="flex items-center gap-1">
-                <X className="h-4 w-4" />
-                Clear all
-              </Button>
+
+              {selectedFilters.length > 0 && (
+                <Button
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={clearFilters}
+                >
+                  <X className="h-4 w-4" />
+                  Clear all
+                </Button>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -121,7 +151,7 @@ export const Filter: React.FC<Props> = ({ children }) => {
                         transition={{ delay: 0.1 * optionIndex + 0.2 }}
                       >
                         <label className="space-y-1 text-sm flex items-center gap-2">
-                          <Checkbox />
+                          <Checkbox onChange={() => toggleFilter(option)} />
                           <span>{option}</span>
                         </label>
                       </motion.li>

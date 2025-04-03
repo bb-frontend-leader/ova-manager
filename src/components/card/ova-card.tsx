@@ -3,13 +3,10 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Image } from "astro:assets";
 import ImageCard from "./ImageCard.astro";
+import type { Ova } from "@/inteface/ova";
 
 interface Props {
-  ova?: {
-    title?: string;
-    group?: string;
-    imagePath?: string;
-  };
+  ova?: Ova;
   children?: React.ReactNode;
 }
 

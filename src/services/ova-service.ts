@@ -9,8 +9,8 @@ export class OvaService {
         this.ApiURL = ApiURL;
     }
 
-    async fetchOvas():  Promise<{ success: true; data: Ova[] } | { success: false; message: string }> {
-        try{
+    async fetchOvas(): Promise<{ success: true; data: Ova[] } | { success: false; message: string }> {
+        try {
             const response = await fetch(this.ApiURL);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -29,6 +29,13 @@ export class OvaService {
                 message: "Error fetching data from API",
             }
         }
+    }
+
+    async fetchOvaGroups(): Promise<string[]> {
+        const response = await fetch(`${this.ApiURL}/groups`);
+        const data: string[] = await response.json();
+
+        return data
     }
 
 }

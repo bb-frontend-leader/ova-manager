@@ -2,34 +2,15 @@ import { useState } from "react";
 import { Checkbox } from "../ui/checkbox";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "../ui/button";
-
 import { ChevronDown, Funnel, X } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
-import { EVENTS } from "@/utils/conts";
-
-const FILTER_CATEGORIES = [
-  {
-    name: "By group",
-    options: ["Autodirigidos", "Autodirigidos grupo 2", "Grupo 2", "Grupo 3"],
-  },
-  {
-    name: "By group",
-    options: ["Autodirigidos", "Autodirigidos grupo 2", "Grupo 2", "Grupo 3"],
-  },
-  {
-    name: "By group",
-    options: ["Autodirigidos", "Autodirigidos grupo 2", "Grupo 2", "Grupo 3"],
-  },
-];
+import type { FilterType } from "@/inteface/ova";
 
 const filterPanelVariants = {
   hidden: {
     opacity: 0,
     y: -20,
     height: 0,
-    transition: {
-      when: "afterChildren",
-    },
+    transition: { when: "afterChildren" },
   },
   visible: {
     opacity: 1,
@@ -49,42 +30,34 @@ const filterCategoryVariants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 24,
-    },
+    transition: { type: "spring", stiffness: 300, damping: 24 },
   },
 };
 
 interface Props {
   children?: React.ReactNode;
+  filters: FilterType[];
+  onFilter: (filters: string[]) => void;
 }
 
-export const Filter: React.FC<Props> = ({ children }) => {
-  const [showFilter, setShowFilter] = useState<boolean>(false);
+export const Filter: React.FC<Props> = ({ children, filters, onFilter }) => {
+  const [showFilter, setShowFilter] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   const toggleFilter = (filter: string) => {
-    if (selectedFilters.includes(filter)) {
-      setSelectedFilters(selectedFilters.filter((f) => f !== filter));
-    } else {
-      setSelectedFilters([...selectedFilters, filter]);
-    }
-    dispatchEventFilter(EVENTS.FILTER);
+    setSelectedFilters((prev) =>
+      prev.includes(filter) ? prev.filter((f) => f !== filter) : [...prev, filter]
+    );
   };
 
   const clearFilters = () => {
     setSelectedFilters([]);
-    dispatchEventFilter(EVENTS.FILTER_CLEAR);
+    onFilter([]);
   };
 
-  const dispatchEventFilter = (eventName: string) => {
-    const event = new CustomEvent(eventName, {
-      detail: selectedFilters,
-    });
-    window.dispatchEvent(event);
-  }
+  const applyFilters = () => {
+    onFilter(selectedFilters);
+  };
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -94,7 +67,7 @@ export const Filter: React.FC<Props> = ({ children }) => {
           className="w-fit"
           aria-pressed={showFilter}
           aria-label="Toggle filter panel"
-          onClick={() => setShowFilter(!showFilter)}
+          onClick={() => setShowFilter((prev) => !prev)}
         >
           <Funnel className="h-4 w-4" />
           <span className="hidden md:inline-block">Filter</span>
@@ -120,7 +93,6 @@ export const Filter: React.FC<Props> = ({ children }) => {
           >
             <div className="flex justify-between items-center pb-2">
               <h2 className="text-xl font-bold">Filter OVAs</h2>
-
               {selectedFilters.length > 0 && (
                 <Button
                   size="sm"
@@ -134,7 +106,7 @@ export const Filter: React.FC<Props> = ({ children }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {FILTER_CATEGORIES.map((category, index) => (
+              {filters.map((category, index) => (
                 <motion.div
                   key={category.name}
                   variants={filterCategoryVariants}
@@ -151,8 +123,12 @@ export const Filter: React.FC<Props> = ({ children }) => {
                         transition={{ delay: 0.1 * optionIndex + 0.2 }}
                       >
                         <label className="space-y-1 text-sm flex items-center gap-2">
-                          <Checkbox onChange={() => toggleFilter(option)} />
-                          <span>{option}</span>
+                          <Checkbox
+                            id={option}
+                            checked={selectedFilters.includes(option)}
+                            onCheckedChange={() => toggleFilter(option)}
+                          />
+                          <span className="capitalize">{option}</span>
                         </label>
                       </motion.li>
                     ))}
@@ -162,13 +138,12 @@ export const Filter: React.FC<Props> = ({ children }) => {
             </div>
 
             <div className="flex gap-4 mt-6">
-              <Button
-                variant="neutral"
-                onClick={() => setShowFilter(!showFilter)}
-              >
-                Cancel
+              <Button variant="neutral" onClick={() => setShowFilter(false)}>
+                Close
               </Button>
-              <Button>Apply</Button>
+              <Button onClick={applyFilters} disabled={selectedFilters.length === 0}>
+                Apply
+              </Button>
             </div>
           </motion.div>
         )}

@@ -69,14 +69,7 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
       >
         {filteredData.length > 0 ? (
           filteredData.map((ova) => (
-            <OvaCard key={ova.id} ova={ova}>
-              {/* <ImageCard
-                src="https://demos.booksandbooksdigital.com.co/200-ovas-2025/ova-14/assets/base/cover.webp"
-                alt={ova.title}
-                width="200"
-                height="300"
-              /> */}
-            </OvaCard>
+            <OvaCard key={ova.id} ova={ova}/>
           ))
         ) : (
           <Alert>

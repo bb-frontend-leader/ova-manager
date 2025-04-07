@@ -1,12 +1,12 @@
 ---
 // Component Imports
 import BaseLayout from "../layouts/main.astro";
-import { OvaService } from "@/services/ova-service";
+import ovaService from "@/services/ova-service";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { ServerCrash } from "lucide-react";
 import { OvaView } from "@/components/ova-view/ova-view";
 
-const ovaService = new OvaService("http://localhost:3001/api/ovas");
+
 const ovas = await ovaService.fetchOvas();
 const groups = await ovaService.fetchOvaGroups();
 ---

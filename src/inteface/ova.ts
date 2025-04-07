@@ -5,6 +5,7 @@ export interface Ova {
     title: string
     group: string
     tags: string[]
+    ovaPath: string
     imagePath: string
 }
 
@@ -12,6 +13,10 @@ export interface OvaAPIResponse {
     id: string
     name: string
     coverPath: string
+    ovaPath: {
+        server: string;
+        local: string;
+    };
     parentFolder: string
     hasAudio: boolean
     hasAudioDescription: boolean

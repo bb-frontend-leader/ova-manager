@@ -23,6 +23,7 @@ export class OvaAdapter {
                 title: item.name,
                 tags: [parseGroup, ...mediaTags],
                 group: parseGroup,
+                ovaPath: item.ovaPath.server,
                 imagePath: item.coverPath
             }
         });

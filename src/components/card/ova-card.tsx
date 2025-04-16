@@ -110,7 +110,7 @@ export const OvaCard: React.FC<Props> = ({ ova }) => {
         <img
           src={ova?.imagePath}
           alt={ova?.title}
-          className="w-full h-48 object-cover"
+          className="w-full h-48 border-border border-2 object-cover"
         />
       </CardContent>
       <CardFooter className="flex flex-between items-center gap-2.5">

@@ -23,6 +23,7 @@ export interface OvaAPIResponse {
     hasVideo: boolean
     hasSubtitles: boolean
     hasVideoSignLanguage: boolean
+    contentSignature?: string
 }
 
 export type FilterType = {

@@ -114,6 +114,8 @@ export const OvaCard: React.FC<Props> = ({ ova, viewMode = 'grid' }) => {
         <img
           src={ova?.imagePath}
           alt={ova?.title}
+          loading="lazy"
+          decoding="async"
           className="h-16 w-24 shrink-0 border-border border-2 object-cover rounded-sm ml-6"
         />
         <div className="flex flex-1 items-center justify-between gap-3 pr-6 overflow-hidden">
@@ -170,7 +172,13 @@ export const OvaCard: React.FC<Props> = ({ ova, viewMode = 'grid' }) => {
         </div>
       </CardHeader>
       <CardContent>
-        <img src={ova?.imagePath} alt={ova?.title} className="w-full h-48 border-border border-2 object-cover" />
+        <img
+          src={ova?.imagePath}
+          alt={ova?.title}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-48 border-border border-2 object-cover"
+        />
       </CardContent>
       <CardFooter className="flex flex-between items-center gap-2.5">
         <Button variant="neutral" onClick={handleNavigateToTheOva}>

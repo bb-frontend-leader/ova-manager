@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 export type SortOrder = 'asc' | 'desc' | 'none';
 
@@ -20,10 +20,9 @@ export const useFilter = <T extends { title?: string; tags?: string[] }>(
   const [searchTerm, setSearchTerm] = useState<string>(initialSearch);
   const [activeFilters, setActiveFilters] = useState<string[]>(initialFilters);
   const [sortOrder, setSortOrder] = useState<SortOrder>(initialSort);
-  const [data, setData] = useState<T[]>(rawData);
 
-  // Apply search, tag filters, and sort whenever any of them change
-  useEffect(() => {
+  // Derive search, tag filters, and sort whenever any of them change
+  const data = useMemo(() => {
     let filteredData = [...rawData];
 
     // Apply search filter if exists
@@ -68,7 +67,7 @@ export const useFilter = <T extends { title?: string; tags?: string[] }>(
       });
     }
 
-    setData(filteredData);
+    return filteredData;
   }, [searchTerm, activeFilters, sortOrder, rawData]);
 
   return {

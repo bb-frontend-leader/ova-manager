@@ -50,7 +50,7 @@ const MainPage = () => {
               <Alert>
                 <ServerCrash className="h-6 w-6 inline-flex justify-center items-center" />
                 <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{ovas.data?.message}</AlertDescription>
+                <AlertDescription>{ovas.error instanceof Error ? ovas.error.message : 'Error fetching data from API'}</AlertDescription>
               </Alert>
             </div>
           )}
@@ -60,7 +60,7 @@ const MainPage = () => {
               <Alert>
                 <ServerCrash className="h-6 w-6 inline-flex justify-center items-center" />
                 <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{groups.data?.message}</AlertDescription>
+                <AlertDescription>{groups.error instanceof Error ? groups.error.message : 'Error fetching groups from API'}</AlertDescription>
               </Alert>
             </div>
           )}

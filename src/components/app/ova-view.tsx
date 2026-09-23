@@ -17,6 +17,7 @@ const GRID_GAP = 14; // matches the previous gap-3.5 (0.875rem)
 const LIST_GAP = 8; // matches the previous gap-2 (0.5rem)
 const GRID_ROW_ESTIMATE = 385; // measured height of a grid OvaCard
 const LIST_ROW_ESTIMATE = 92; // measured height of a list OvaCard
+const LIST_ROW_ESTIMATE_COMPACT = 140; // list OvaCard stacks its buttons below `md` (768px)
 
 interface Props {
   data: Ova[];
@@ -75,7 +76,10 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
   const rowVirtualizer = useVirtualizer({
     count: filteredData.length,
     getScrollElement: () => scrollEl,
-    estimateSize: () => (viewMode === 'grid' ? GRID_ROW_ESTIMATE : LIST_ROW_ESTIMATE),
+    estimateSize: () => {
+      if (viewMode === 'grid') return GRID_ROW_ESTIMATE;
+      return window.matchMedia('(min-width: 48rem)').matches ? LIST_ROW_ESTIMATE : LIST_ROW_ESTIMATE_COMPACT;
+    },
     overscan: 6,
     lanes: columns,
     laneAssignmentMode: 'estimate',

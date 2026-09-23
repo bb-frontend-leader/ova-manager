@@ -75,6 +75,10 @@ npx cz
 ```
 Usa Commitizen con la convención `conventional-changelog`.
 
+Los hooks de Husky se activan solos al ejecutar `npm install` (script `prepare`):
+- `commit-msg`: valida el mensaje con commitlint (convención de commits).
+- `pre-commit`: con lint-staged formatea (Prettier) y corrige (ESLint) los `.ts`/`.tsx` en staging; un error de ESLint bloquea el commit.
+
 ## 📁 Estructura del proyecto
 
 ```

@@ -1,4 +1,4 @@
-import { Route, Router, Switch } from 'wouter';
+import { Redirect, Route, Router, Switch } from 'wouter';
 import { useHashLocation } from 'wouter/use-hash-location';
 import { Toaster } from '@ui';
 
@@ -16,6 +16,10 @@ const App = () => {
             <ProtectedRoute>
               <MainPage />
             </ProtectedRoute>
+          </Route>
+          {/* Unknown paths (#/anything) go home instead of rendering a blank page */}
+          <Route>
+            <Redirect to="/" replace />
           </Route>
         </Switch>
       </Router>

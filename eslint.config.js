@@ -7,7 +7,8 @@ import prettier from 'eslint-config-prettier'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  // .agents / .claude hold Claude skill templates, not application code
+  { ignores: ['dist', '.agents', '.claude'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
@@ -47,5 +48,10 @@ export default tseslint.config(
         }
       ]
     },
+  },
+  {
+    // shadcn convention: a component and its `variants` helper live in the same file
+    files: ['src/components/ui/**/*.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
 )

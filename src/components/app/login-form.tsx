@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-
 interface LoginFormProps {
   onLogin: (username: string, password: string) => Promise<void>;
 }
@@ -49,28 +48,38 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             <Label htmlFor="username">Username</Label>
             <Input
               id="username"
+              name="username"
               type="text"
-              placeholder="admin"
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
               disabled={loading}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? 'login-error' : undefined}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
+              name="password"
               type="password"
+              autoComplete="current-password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? 'login-error' : undefined}
             />
           </div>
           {error && (
-            <Alert variant="destructive" className="">
+            <Alert id="login-error" variant="destructive" className="">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}

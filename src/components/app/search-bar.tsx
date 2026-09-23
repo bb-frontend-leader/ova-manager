@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { Search, X } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { Search, X } from 'lucide-react';
 
-import { useDebounce } from "@/hooks/useDebounce";
+import { useDebounce } from '@/hooks/useDebounce';
 
-import { Input } from "../ui/input";
+import { Input } from '../ui/input';
 
 interface Props {
   onSearch: (searchTerm: string) => void;
@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const SearchBar: React.FC<Props> = ({ onSearch, defaultValue }) => {
-  const [search, setSearch] = useState<string>(defaultValue ?? "");
+  const [search, setSearch] = useState<string>(defaultValue ?? '');
   const debouncedSearch = useDebounce(search, 300);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,17 +19,17 @@ export const SearchBar: React.FC<Props> = ({ onSearch, defaultValue }) => {
   };
 
   const handleClear = () => {
-    setSearch("");
+    setSearch('');
   };
 
   useEffect(() => {
     onSearch(debouncedSearch);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, onSearch]);
 
   return (
     <div className="relative md:w-64">
-       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-      
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+
       <Input
         type="text"
         placeholder="Search ova..."
@@ -37,7 +37,7 @@ export const SearchBar: React.FC<Props> = ({ onSearch, defaultValue }) => {
         value={search}
         onChange={handleChange}
       />
-      
+
       {search && (
         <button
           onClick={handleClear}

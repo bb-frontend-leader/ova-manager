@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { Drumstick } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cleanString } from '@utils/clean-string';
 
@@ -125,7 +125,8 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
         sortOrder={sortOrder}
         onSort={handleSort}
         viewMode={viewMode}
-        onViewMode={setViewMode}>
+        onViewMode={setViewMode}
+      >
         <SearchBar onSearch={handleSearch} defaultValue={initialSearch} />
         <p className="text-sm text-muted-foreground ml-auto">
           Showing <span className="font-semibold">{filteredData.length}</span> of{' '}
@@ -139,16 +140,29 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.18 }}
-          className="h-full min-h-0">
+          className="h-full min-h-0"
+        >
           <div
             ref={setScrollEl}
-            className="container-border scrollbar-subtle h-full min-h-0 overflow-y-auto px-10 py-8 not-prose z-15 relative bg-[radial-gradient(#80808080_1px,transparent_1px)] shadow-light dark:shadow-dark bg-size-[16px_16px]">
+            className="container-border scrollbar-subtle h-full min-h-0 overflow-y-auto px-10 py-8 not-prose z-15 relative bg-[radial-gradient(#80808080_1px,transparent_1px)] shadow-light dark:shadow-dark bg-size-[16px_16px]"
+          >
             {filteredData.length > 0 ? (
-              <div ref={setGridEl} style={{ position: 'relative', width: '100%', height: rowVirtualizer.getTotalSize() }}>
+              <div
+                ref={setGridEl}
+                style={{ position: 'relative', width: '100%', height: rowVirtualizer.getTotalSize() }}
+              >
                 <span
                   ref={setProbeEl}
                   aria-hidden="true"
-                  style={{ position: 'absolute', top: 0, left: 0, visibility: 'hidden', width: '30ch', height: 0, overflow: 'hidden' }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    visibility: 'hidden',
+                    width: '30ch',
+                    height: 0,
+                    overflow: 'hidden'
+                  }}
                 />
                 {rowVirtualizer.getVirtualItems().map((virtualItem) => {
                   const ova = filteredData[virtualItem.index];
@@ -165,7 +179,8 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
                         transform: `translateY(${virtualItem.start}px)`,
                         boxSizing: 'border-box',
                         paddingRight: viewMode === 'grid' ? GRID_GAP : 0
-                      }}>
+                      }}
+                    >
                       <OvaCard ova={ova} viewMode={viewMode} />
                     </div>
                   );

@@ -68,11 +68,7 @@ const MainPage = () => {
           {(ovas.isLoading || groups.isLoading) && (
             <div className="h-full min-h-0 overflow-y-auto">
               <OvaViewSkeleton
-                viewMode={
-                  (new URLSearchParams(
-                    window.location.hash.includes('?') ? window.location.hash.split('?')[1] : ''
-                  ).get('view') as 'grid' | 'list') ?? 'grid'
-                }
+                viewMode={new URLSearchParams(window.location.search).get('view') === 'list' ? 'list' : 'grid'}
               />
             </div>
           )}

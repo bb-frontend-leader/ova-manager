@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Drumstick } from 'lucide-react';
-import { useLocation } from 'wouter';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cleanString } from '@utils/clean-string';
 
@@ -16,8 +15,8 @@ import { SearchBar } from './search-bar';
 
 const GRID_GAP = 14; // matches the previous gap-3.5 (0.875rem)
 const LIST_GAP = 8; // matches the previous gap-2 (0.5rem)
-const GRID_ROW_ESTIMATE = 340;
-const LIST_ROW_ESTIMATE = 96;
+const GRID_ROW_ESTIMATE = 385; // measured height of a grid OvaCard
+const LIST_ROW_ESTIMATE = 92; // measured height of a list OvaCard
 
 interface Props {
   data: Ova[];
@@ -25,16 +24,14 @@ interface Props {
 }
 
 export const OvaView: React.FC<Props> = ({ data, groups }) => {
-  const [location, setLocation] = useLocation();
-
-  // Parse initial values from URL on mount
-  const searchIdx = location.indexOf('?');
-  const locationQs = searchIdx >= 0 ? location.slice(searchIdx + 1) : '';
-  const urlParams = new URLSearchParams(locationQs);
+  // Parse initial values from the URL. With hash routing wouter keeps the query
+  // string in the real `location.search`, not inside the hash.
+  const urlParams = new URLSearchParams(window.location.search);
+  const sortParam = urlParams.get('sort');
   const initialSearch = urlParams.get('search') ?? '';
   const initialFilters = urlParams.get('filters') ? urlParams.get('filters')!.split(',') : [];
-  const initialSort = (urlParams.get('sort') as SortOrder) ?? 'none';
-  const initialView = (urlParams.get('view') as 'grid' | 'list') ?? 'grid';
+  const initialSort: SortOrder = sortParam === 'asc' || sortParam === 'desc' ? sortParam : 'none';
+  const initialView: 'grid' | 'list' = urlParams.get('view') === 'list' ? 'list' : 'grid';
 
   const {
     data: filteredData,
@@ -48,38 +45,36 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(initialView);
 
+  // The scroll/grid/probe elements are remounted by AnimatePresence whenever the
+  // view mode changes (or the list empties), so they're tracked as state via
+  // callback refs; effects then re-attach to whichever element is currently mounted.
+  const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
+  const [gridEl, setGridEl] = useState<HTMLDivElement | null>(null);
+  const [probeEl, setProbeEl] = useState<HTMLSpanElement | null>(null);
+  const [measuredColumns, setMeasuredColumns] = useState(1);
+  const columns = viewMode === 'grid' ? measuredColumns : 1;
+
   // Measure available width to compute how many grid columns fit (mirrors the
   // previous CSS `grid-cols-[repeat(auto-fit,minmax(min(100%,30ch),1fr))]` rule)
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
-  const probeRef = useRef<HTMLSpanElement>(null);
-  const [columns, setColumns] = useState(1);
-
-  useEffect(() => {
-    if (viewMode === 'list') {
-      setColumns(1);
-      return;
-    }
-    const container = gridRef.current;
-    const probe = probeRef.current;
-    if (!container || !probe) return;
+  useLayoutEffect(() => {
+    if (!gridEl || !probeEl) return;
 
     const recompute = () => {
-      const minColumnWidth = probe.getBoundingClientRect().width;
-      const availableWidth = container.getBoundingClientRect().width;
-      const next = Math.max(1, Math.floor((availableWidth + GRID_GAP) / (minColumnWidth + GRID_GAP)));
-      setColumns(next);
+      const minColumnWidth = probeEl.getBoundingClientRect().width;
+      const availableWidth = gridEl.getBoundingClientRect().width;
+      if (!minColumnWidth || !availableWidth) return;
+      setMeasuredColumns(Math.max(1, Math.floor((availableWidth + GRID_GAP) / (minColumnWidth + GRID_GAP))));
     };
 
     recompute();
     const observer = new ResizeObserver(recompute);
-    observer.observe(container);
+    observer.observe(gridEl);
     return () => observer.disconnect();
-  }, [viewMode]);
+  }, [gridEl, probeEl]);
 
   const rowVirtualizer = useVirtualizer({
     count: filteredData.length,
-    getScrollElement: () => scrollRef.current,
+    getScrollElement: () => scrollEl,
     estimateSize: () => (viewMode === 'grid' ? GRID_ROW_ESTIMATE : LIST_ROW_ESTIMATE),
     overscan: 6,
     lanes: columns,
@@ -100,8 +95,11 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
     if (sortOrder !== 'none') params.set('sort', sortOrder);
     if (viewMode !== 'grid') params.set('view', viewMode);
     const qs = params.toString();
-    setLocation(qs ? `/?${qs}` : '/');
-  }, [searchTerm, activeFilters, sortOrder, viewMode, setLocation]);
+    // wouter's hash `navigate` reuses the current `location.search` when the new
+    // path has no query, so it can never clear params; write the URL directly.
+    const url = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`;
+    window.history.replaceState(window.history.state, '', url);
+  }, [searchTerm, activeFilters, sortOrder, viewMode]);
 
   const filters: FilterType[] = [
     {
@@ -139,12 +137,12 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
           transition={{ duration: 0.18 }}
           className="h-full min-h-0">
           <div
-            ref={scrollRef}
+            ref={setScrollEl}
             className="container-border scrollbar-subtle h-full min-h-0 overflow-y-auto px-10 py-8 not-prose z-15 relative bg-[radial-gradient(#80808080_1px,transparent_1px)] shadow-light dark:shadow-dark bg-size-[16px_16px]">
             {filteredData.length > 0 ? (
-              <div ref={gridRef} style={{ position: 'relative', width: '100%', height: rowVirtualizer.getTotalSize() }}>
+              <div ref={setGridEl} style={{ position: 'relative', width: '100%', height: rowVirtualizer.getTotalSize() }}>
                 <span
-                  ref={probeRef}
+                  ref={setProbeEl}
                   aria-hidden="true"
                   style={{ position: 'absolute', top: 0, left: 0, visibility: 'hidden', width: '30ch', height: 0, overflow: 'hidden' }}
                 />
@@ -162,8 +160,7 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
                         width: `${100 / columns}%`,
                         transform: `translateY(${virtualItem.start}px)`,
                         boxSizing: 'border-box',
-                        paddingRight: viewMode === 'grid' ? GRID_GAP : 0,
-                        paddingBottom: viewMode === 'grid' ? GRID_GAP : LIST_GAP
+                        paddingRight: viewMode === 'grid' ? GRID_GAP : 0
                       }}>
                       <OvaCard ova={ova} viewMode={viewMode} />
                     </div>

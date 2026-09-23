@@ -1,17 +1,12 @@
-import { useEffect } from 'react';
 import { ServerCrash } from 'lucide-react';
-import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, AlertDescription, AlertTitle, Footer, Header } from '@ui';
 
 import { OvaView, OvaViewSkeleton } from '@/components/app';
-import { useAuth } from '@/hooks/useAuth';
 import ovaService from '@/services/ova-service';
 
+// Rendered inside <ProtectedRoute>, which already guarantees there is a session.
 const MainPage = () => {
-  const [, setLocation] = useLocation();
-  const { isAuthenticated } = useAuth();
-
   // Get the OVAs
   const ovas = useQuery({
     queryKey: ['ovas'],
@@ -27,18 +22,6 @@ const MainPage = () => {
     refetchOnWindowFocus: false,
     retry: false
   });
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      setLocation('/login');
-    }
-  }, [isAuthenticated, setLocation]);
-
-  // Check authentication before rendering
-  if (!isAuthenticated()) {
-    return null;
-  }
 
   return (
     <div className="relative h-screen w-full bg-bg grid grid-rows-[auto_1fr_auto] gap-3.5 overflow-hidden">

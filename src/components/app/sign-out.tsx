@@ -1,5 +1,5 @@
 import { LogOut } from 'lucide-react';
-import { useLocation } from 'wouter';
+import { toast } from 'sonner';
 
 import { useAuth } from '@/hooks/useAuth';
 
@@ -7,12 +7,10 @@ import { Button } from '../ui';
 
 export const SignOut = () => {
   const { logout } = useAuth();
-  const [, setLocation] = useLocation();
 
-  // Handle sign out action
+  // ProtectedRoute sends the user to /login as soon as the session is cleared
   const handleSignOut = () => {
-    logout();
-    setLocation('/login');
+    logout().catch(() => toast.error('Could not reach the server to close your session.'));
   };
 
   return (

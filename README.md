@@ -4,7 +4,7 @@ Interfaz de usuario para explorar, buscar y gestionar OVAs (Objetos Virtuales de
 
 ## ✨ Características
 
-- 🔐 Autenticación local con sesión persistente en cookie (48 h) y rutas protegidas.
+- 🔐 Login contra un servidor propio (`ova-auth-server`, Node + SQLite) con sesión en cookie HttpOnly (48 h) y rutas protegidas.
 - 📦 Listado de OVAs consumido desde una API REST con adaptador de datos.
 - 🔍 Búsqueda en tiempo real por título con normalización de texto.
 - 🏷️ Filtrado por etiquetas (tags) con ordenamiento por relevancia.
@@ -28,12 +28,23 @@ Interfaz de usuario para explorar, buscar y gestionar OVAs (Objetos Virtuales de
 
 3. Crea el archivo de variables de entorno en la raíz del proyecto:
    ```bash
-   cp .env.example .env
+   cp .env.template .env
    ```
    Luego edita `.env` y define la URL base de la API:
    ```env
    VITE_PUBLIC_API_URL=http://localhost:3000/api/ovas
    ```
+   La URL del servidor de login (`VITE_AUTH_API_URL`) ya viene con `http://localhost:3100` para desarrollo en `.env.development`. Para un build de producción defínela en `.env` con la URL real del servidor.
+
+4. Levanta el servidor de login (proyecto hermano `../ova-auth-server`) y crea al menos un usuario; sin él no se puede iniciar sesión:
+   ```bash
+   cd ../ova-auth-server
+   npm install
+   cp .env.template .env
+   npm run user:create -- <usuario>
+   npm run dev
+   ```
+   Más detalles en el README de `ova-auth-server`.
 
 ## 🚀 Uso
 

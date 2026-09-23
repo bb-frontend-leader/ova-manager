@@ -9,24 +9,16 @@ const LoginPage = () => {
   const [, setLocation] = useLocation();
   const { login, isAuthenticated } = useAuth();
 
-  // Redirect to main page if already authenticated
+  // Go to the main page as soon as there is a session (already signed in, or just logged in)
   useEffect(() => {
-    if (isAuthenticated()) {
+    if (isAuthenticated) {
       setLocation('/');
     }
   }, [isAuthenticated, setLocation]);
 
   const handleLogin = async (username: string, password: string) => {
-    try {
-      const response = await login(username, password);
-      if (response.success) {
-        toast.success('Welcome! You have successfully logged in.');
-        setLocation('/');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error; // Re-throw to be caught by LoginForm
-    }
+    await login({ username, password }); // rejects with a user-facing message, shown by LoginForm
+    toast.success('Welcome! You have successfully logged in.');
   };
 
   return (

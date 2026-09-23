@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
 import { LoaderCircle } from 'lucide-react';
-import { useLocation } from 'wouter';
+import { Redirect } from 'wouter';
 
 import { useAuth } from '@/hooks/useAuth';
 
@@ -9,16 +8,9 @@ interface Props {
 }
 
 export const ProtectedRoute: React.FC<Props> = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-  const [, setLocation] = useLocation();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      setLocation('/login');
-    }
-  }, [isAuthenticated, loading, setLocation]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <LoaderCircle className="h-12 w-12 animate-spin text-main" />
@@ -27,7 +19,7 @@ export const ProtectedRoute: React.FC<Props> = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    return null;
+    return <Redirect to="/login" replace />;
   }
 
   return <>{children}</>;

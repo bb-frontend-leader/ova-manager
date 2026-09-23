@@ -1,19 +1,6 @@
-import { AuthResponse } from '@/types/auth';
-import { deleteCookie, getCookie, setCookie } from '@/utils/cookies';
+import type { AuthResponse } from '@/types/auth';
 
-const COOKIE_NAME = 'ovas_auth_token';
-const COOKIE_OPTIONS = {
-  path: '/',
-  maxAge: 48 * 60 * 60, // 48 hours
-  secure: true,
-  sameSite: 'strict' as const
-};
-
-// Local credentials — each key maps to its corresponding password
-const VALID_CREDENTIALS: Record<string, string> = {
-  "UserUnadResocurces": ")a)I^66i#83r|_8AhF",
-  "admin": ":v"
-};
+export type SessionUser = AuthResponse['user'];
 
 class AuthService {
   private static instance: AuthService;
@@ -27,62 +14,48 @@ class AuthService {
     return AuthService.instance;
   }
 
+  private async request(path: string, init: RequestInit = {}): Promise<Response> {
+    const baseUrl = import.meta.env.VITE_AUTH_API_URL?.replace(/\/+$/, '');
+    if (!baseUrl) {
+      throw new Error('VITE_AUTH_API_URL is not set. Check your .env file.');
+    }
+
+    try {
+      // The session lives in an HttpOnly cookie set by the auth server, so it has to be sent explicitly.
+      return await fetch(`${baseUrl}${path}`, { credentials: 'include', ...init });
+    } catch {
+      throw new Error('Cannot reach the authentication server. Please try again later.');
+    }
+  }
+
   async login(username: string, password: string): Promise<AuthResponse> {
-    try {
-      // Validate credentials locally — checks that the username exists and its paired password matches
-      if (VALID_CREDENTIALS[username] !== password) {
-        throw new Error('Invalid credentials');
-      }
+    const response = await this.request('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
 
-      // Create session data
-      const sessionData = {
-        username,
-        role: 'admin',
-        loginTime: new Date().toISOString()
-      };
+    if (response.status === 401) throw new Error('Invalid username or password. Please try again.');
+    if (response.status === 429) throw new Error('Too many attempts. Please wait a few minutes and try again.');
+    if (!response.ok) throw new Error('Could not sign in. Please try again later.');
 
-      // Save session in cookie
-      setCookie(COOKIE_NAME, JSON.stringify(sessionData), COOKIE_OPTIONS);
-
-      return {
-        success: true,
-        user: {
-          username,
-          role: 'admin'
-        }
-      };
-    } catch (error) {
-      console.error('Login error:', error);
-      throw new Error('Authentication failed');
-    }
+    return response.json();
   }
 
-  logout(): void {
-    deleteCookie(COOKIE_NAME);
+  async logout(): Promise<void> {
+    const response = await this.request('/auth/logout', { method: 'POST' });
+    if (!response.ok) throw new Error('Could not close the session on the server.');
   }
 
-  isAuthenticated(): boolean {
-    try {
-      const sessionData = getCookie(COOKIE_NAME);
-      return !!sessionData;
-    } catch (error) {
-      console.error('Authentication check error:', error);
-      this.logout();
-      return false;
-    }
-  }
+  // Returns the signed-in user, or null when there is no valid session.
+  async getSession(): Promise<SessionUser | null> {
+    const response = await this.request('/auth/me');
 
-  getUserData(): Record<string, unknown> | null {
-    try {
-      const sessionData = getCookie(COOKIE_NAME);
-      if (!sessionData) return null;
+    if (response.status === 401) return null;
+    if (!response.ok) throw new Error('Could not verify the session.');
 
-      return JSON.parse(sessionData);
-    } catch (error) {
-      console.error('Get user data error:', error);
-      this.logout();
-      return null;
-    }
+    const data: { user: SessionUser } = await response.json();
+    return data.user;
   }
 }
 

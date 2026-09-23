@@ -1,44 +1,43 @@
-import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import authService from '@/services/auth-service';
-import { AuthResponse } from '@/types/auth';
+import type { LoginCredentials } from '@/types/auth';
+
+const AUTH_QUERY_KEY = ['auth', 'me'] as const;
 
 export const useAuth = () => {
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Function to check if the user is authenticated
-  const isAuthenticated = (): boolean => {
-    return authService.isAuthenticated();
-  };
+  // The session is owned by the server (HttpOnly cookie), so the UI asks it who is signed in.
+  const session = useQuery({
+    queryKey: AUTH_QUERY_KEY,
+    queryFn: () => authService.getSession(),
+    retry: false,
+    staleTime: 5 * 60 * 1000
+  });
 
-  // Function to get user data
-  const getUserData = (): Record<string, unknown> | null => {
-    return authService.getUserData();
-  };
+  const loginMutation = useMutation({
+    mutationFn: ({ username, password }: LoginCredentials) => authService.login(username, password),
+    onSuccess: (response) => queryClient.setQueryData(AUTH_QUERY_KEY, response.user)
+  });
 
-  // Function to log in the user
-  const login = async (username: string, password: string): Promise<AuthResponse> => {
-    setLoading(true);
-    try {
-      const response = await authService.login(username, password);
-      return response;
-    } catch {
-      throw new Error('Invalid username or password. Please try again.');
-    } finally {
-      setLoading(false);
+  const logoutMutation = useMutation({
+    mutationFn: () => authService.logout(),
+    // Sign out locally even if the server couldn't be reached, and drop data cached for that session.
+    onSettled: () => {
+      queryClient.setQueryData(AUTH_QUERY_KEY, null);
+      queryClient.removeQueries({ queryKey: ['ovas'] });
+      queryClient.removeQueries({ queryKey: ['groups'] });
     }
-  };
+  });
 
-  // Function to log out the user
-  const logout = () => {
-    authService.logout();
-  };
+  const user = session.data ?? null;
 
-  return { 
-    isAuthenticated,
-    loading,
-    login, 
-    logout,
-    getUserData
+  return {
+    user,
+    isAuthenticated: user !== null,
+    isLoading: session.isLoading,
+    login: loginMutation.mutateAsync,
+    logout: logoutMutation.mutateAsync
   };
 };

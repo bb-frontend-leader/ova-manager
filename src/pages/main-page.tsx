@@ -44,7 +44,7 @@ const MainPage = () => {
     <div className="relative h-screen w-full bg-bg grid grid-rows-[auto_1fr_auto] gap-3.5 overflow-hidden">
       <Header />
       <main className="container mx-auto h-full min-h-0 w-[min(100%-1rem,150ch)]">
-        <section className="w-full h-full grid grid-rows-[auto_1fr] gap-2.5">
+        <section className="w-full h-full grid grid-rows-[minmax(0,max-content)_minmax(8rem,1fr)] gap-2.5">
           {ovas.isError && (
             <div className="container-border h-fit min-h-0 overflow-y-auto px-10 py-8 not-prose z-15 relative bg-[radial-gradient(#80808080_1px,transparent_1px)] shadow-light dark:shadow-dark bg-size-[16px_16px]">
               <Alert>
@@ -66,7 +66,7 @@ const MainPage = () => {
           )}
 
           {(ovas.isLoading || groups.isLoading) && (
-            <div className="h-full min-h-0 overflow-y-auto">
+            <div className="row-span-2 h-full min-h-0 overflow-y-auto">
               <OvaViewSkeleton
                 viewMode={new URLSearchParams(window.location.search).get('view') === 'list' ? 'list' : 'grid'}
               />

@@ -61,7 +61,7 @@ class OvaService {
         }
     }
 
-    async fetchOvaZip(id: string): Promise<{ message: string; data: string } | { data: null; message: string }> {
+    async fetchOvaZip(id: string): Promise<{ message: string; data: string }> {
         try {
             const response = await fetch(`${this.ApiURL}/zip/${id}`);
             if (!response.ok) {
@@ -76,11 +76,8 @@ class OvaService {
                 data: url,
             };
         } catch (error) {
-            console.error("Error fetching data from API:", error);
-            return {
-                message: "Error generated zip",
-                data: null,
-            }
+            console.error("Error fetching zip from API:", error);
+            throw error instanceof Error ? error : new Error('Error generating zip');
         }
     }
 

@@ -27,8 +27,6 @@ export const OvaCard: React.FC<Props> = ({ ova, viewMode = 'grid' }) => {
       });
     },
     onSuccess: (zip) => {
-      if (!zip.data) return;
-
       toast.success('Download ready! 📁', {
         id: toastIdRef.current,
         duration: 5000,
@@ -119,9 +117,12 @@ export const OvaCard: React.FC<Props> = ({ ova, viewMode = 'grid' }) => {
           className="h-16 w-24 shrink-0 border-border border-2 object-cover rounded-sm ml-6"
         />
         <div className="flex flex-1 items-center justify-between gap-3 pr-6 overflow-hidden">
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h2 className="text-sm font-bold capitalize truncate">{ova?.title || 'Ova'}</h2>
+          <div className="min-w-0 space-y-1">
+            <Badge variant="neutral" className="text-[10px] px-1.5 py-0 font-light uppercase">
+              {ova?.group || 'Group-2'}
+            </Badge>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h2 className="text-sm font-bold capitalize truncate min-w-0">{ova?.title || 'Ova'}</h2>
               <button
                 onClick={handleCopyLink}
                 aria-label="Copy OVA link"
@@ -130,9 +131,6 @@ export const OvaCard: React.FC<Props> = ({ ova, viewMode = 'grid' }) => {
                 <Link className="h-3 w-3" />
               </button>
             </div>
-            <Badge variant="neutral" className="text-xs font-light uppercase mt-1">
-              {ova?.group || 'Group-2'}
-            </Badge>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="neutral" size="sm" onClick={handleNavigateToTheOva}>
@@ -155,20 +153,18 @@ export const OvaCard: React.FC<Props> = ({ ova, viewMode = 'grid' }) => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <h2 className="text-lg font-bold capitalize">{ova?.title || 'Ova'}</h2>
-            <button
-              onClick={handleCopyLink}
-              aria-label="Copy OVA link"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Link className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          <Badge variant="neutral" className="text-xs font-light uppercase">
-            {ova?.group || 'Group-2'}
-          </Badge>
+        <Badge variant="neutral" className="text-[10px] px-1.5 py-0 font-light uppercase">
+          {ova?.group || 'Group-2'}
+        </Badge>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <h2 className="text-lg font-bold capitalize truncate min-w-0">{ova?.title || 'Ova'}</h2>
+          <button
+            onClick={handleCopyLink}
+            aria-label="Copy OVA link"
+            className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Link className="h-3.5 w-3.5" />
+          </button>
         </div>
       </CardHeader>
       <CardContent>

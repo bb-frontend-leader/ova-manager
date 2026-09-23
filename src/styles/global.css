@@ -85,3 +85,13 @@
   @apply grid place-content-start grid-cols-[repeat(auto-fit,minmax(min(100%,30ch),1fr))] gap-3.5;
 }
 
+/* Native scrollbar, tinted gray (thumb + track) */
+.scrollbar-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: #a3a3a3 #f3f3f3;
+}
+
+.dark .scrollbar-subtle {
+  scrollbar-color: #737373 #3a3a3a;
+}
+

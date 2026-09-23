@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Drumstick } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { cleanString } from '@utils/clean-string';
 
 import { type SortOrder, useFilter } from '@/hooks/useFilter';
@@ -13,6 +13,11 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Filter } from './filter';
 import { OvaCard } from './ova-card';
 import { SearchBar } from './search-bar';
+
+const GRID_GAP = 14; // matches the previous gap-3.5 (0.875rem)
+const LIST_GAP = 8; // matches the previous gap-2 (0.5rem)
+const GRID_ROW_ESTIMATE = 340;
+const LIST_ROW_ESTIMATE = 96;
 
 interface Props {
   data: Ova[];
@@ -42,6 +47,45 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
   } = useFilter<Ova>(data, initialSearch, initialFilters, initialSort);
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(initialView);
+
+  // Measure available width to compute how many grid columns fit (mirrors the
+  // previous CSS `grid-cols-[repeat(auto-fit,minmax(min(100%,30ch),1fr))]` rule)
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const probeRef = useRef<HTMLSpanElement>(null);
+  const [columns, setColumns] = useState(1);
+
+  useEffect(() => {
+    if (viewMode === 'list') {
+      setColumns(1);
+      return;
+    }
+    const container = gridRef.current;
+    const probe = probeRef.current;
+    if (!container || !probe) return;
+
+    const recompute = () => {
+      const minColumnWidth = probe.getBoundingClientRect().width;
+      const availableWidth = container.getBoundingClientRect().width;
+      const next = Math.max(1, Math.floor((availableWidth + GRID_GAP) / (minColumnWidth + GRID_GAP)));
+      setColumns(next);
+    };
+
+    recompute();
+    const observer = new ResizeObserver(recompute);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [viewMode]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: filteredData.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => (viewMode === 'grid' ? GRID_ROW_ESTIMATE : LIST_ROW_ESTIMATE),
+    overscan: 6,
+    lanes: columns,
+    laneAssignmentMode: 'estimate',
+    gap: viewMode === 'grid' ? GRID_GAP : LIST_GAP
+  });
 
   // Sync filter state back to URL on every change (skip on first render)
   const isFirstRender = useRef(true);
@@ -93,22 +137,47 @@ export const OvaView: React.FC<Props> = ({ data, groups }) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.18 }}
-          className={clsx(
-            'container-border px-10 py-8 not-prose z-15 relative bg-[radial-gradient(#80808080_1px,transparent_1px)] shadow-light dark:shadow-dark bg-size-[16px_16px]',
-            {
-              'container-grid': filteredData.length > 0 && viewMode === 'grid',
-              'flex flex-col gap-2': filteredData.length > 0 && viewMode === 'list'
-            }
-          )}>
-          {filteredData.length > 0 ? (
-            filteredData.map((ova) => <OvaCard key={ova.id} ova={ova} viewMode={viewMode} />)
-          ) : (
-            <Alert>
-              <Drumstick />
-              <AlertTitle>No results found</AlertTitle>
-              <AlertDescription>No results were found for the applied search or filter.</AlertDescription>
-            </Alert>
-          )}
+          className="h-full min-h-0">
+          <div
+            ref={scrollRef}
+            className="container-border scrollbar-subtle h-full min-h-0 overflow-y-auto px-10 py-8 not-prose z-15 relative bg-[radial-gradient(#80808080_1px,transparent_1px)] shadow-light dark:shadow-dark bg-size-[16px_16px]">
+            {filteredData.length > 0 ? (
+              <div ref={gridRef} style={{ position: 'relative', width: '100%', height: rowVirtualizer.getTotalSize() }}>
+                <span
+                  ref={probeRef}
+                  aria-hidden="true"
+                  style={{ position: 'absolute', top: 0, left: 0, visibility: 'hidden', width: '30ch', height: 0, overflow: 'hidden' }}
+                />
+                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                  const ova = filteredData[virtualItem.index];
+                  return (
+                    <div
+                      key={virtualItem.key}
+                      data-index={virtualItem.index}
+                      ref={rowVirtualizer.measureElement}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: `${(virtualItem.lane / columns) * 100}%`,
+                        width: `${100 / columns}%`,
+                        transform: `translateY(${virtualItem.start}px)`,
+                        boxSizing: 'border-box',
+                        paddingRight: viewMode === 'grid' ? GRID_GAP : 0,
+                        paddingBottom: viewMode === 'grid' ? GRID_GAP : LIST_GAP
+                      }}>
+                      <OvaCard ova={ova} viewMode={viewMode} />
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <Alert>
+                <Drumstick />
+                <AlertTitle>No results found</AlertTitle>
+                <AlertDescription>No results were found for the applied search or filter.</AlertDescription>
+              </Alert>
+            )}
+          </div>
         </motion.div>
       </AnimatePresence>
     </>

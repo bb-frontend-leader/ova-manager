@@ -10,7 +10,7 @@ Interfaz de usuario para explorar, buscar y gestionar OVAs (Objetos Virtuales de
 - 🏷️ Filtrado por etiquetas (tags) con ordenamiento por relevancia.
 - 🔃 Ordenamiento alfabético ascendente / descendente.
 - 💅 UI construida con componentes Radix UI + Tailwind CSS v4.
-- 🔔 Notificaciones tipo toast con Sonner.
+- 🔔 Avisos al usuario mediante modales (Radix Dialog) con mensajes claros y pasos a seguir.
 - ⚡ Data fetching y caché con TanStack Query v5.
 
 ## 📥 Instalación

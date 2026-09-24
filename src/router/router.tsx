@@ -1,14 +1,13 @@
 import { Redirect, Route, Router, Switch } from 'wouter';
 import { useHashLocation } from 'wouter/use-hash-location';
-import { Toaster } from '@ui';
 
-import { ProtectedRoute } from '@/components/app';
+import { NoticeProvider, ProtectedRoute } from '@/components/app';
 import LoginPage from '@/pages/login-page';
 import MainPage from '@/pages/main-page';
 
 const App = () => {
   return (
-    <>
+    <NoticeProvider>
       <Router hook={useHashLocation}>
         <Switch>
           <Route path="/login" component={LoginPage} />
@@ -23,8 +22,7 @@ const App = () => {
           </Route>
         </Switch>
       </Router>
-      <Toaster />
-    </>
+    </NoticeProvider>
   );
 };
 

@@ -1,16 +1,28 @@
 import { LogOut } from 'lucide-react';
-import { toast } from 'sonner';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useNotice } from '@/hooks/useNotice';
 
 import { Button } from '../ui';
 
 export const SignOut = () => {
   const { logout } = useAuth();
+  const { showNotice } = useNotice();
 
   // ProtectedRoute sends the user to /login as soon as the session is cleared
   const handleSignOut = () => {
-    logout().catch(() => toast.error('Could not reach the server to close your session.'));
+    logout().catch(() =>
+      showNotice({
+        variant: 'error',
+        title: "We couldn't fully sign you out",
+        description:
+          "You were taken back to the sign-in screen, but we couldn't reach the server to close your session, so it may still be open.",
+        steps: [
+          'Check that your internet connection is working.',
+          'If you are on a shared computer, reload this page. If the app opens without asking for your password, press "Sign Out" again.'
+        ]
+      })
+    );
   };
 
   return (

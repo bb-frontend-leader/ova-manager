@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { Link } from 'lucide-react';
-import { toast } from 'sonner';
 
+import { useNotice } from '@/hooks/useNotice';
 import ovaService from '@/services/ova-service';
 import type { Ova } from '@/types/ova';
 
@@ -20,6 +20,7 @@ interface Props {
 
 export const OvaCard: React.FC<Props> = ({ ova, viewMode = 'grid' }) => {
   const [isStarting, setIsStarting] = useState(false);
+  const { showNotice } = useNotice();
 
   // Function to navigate to the OVA's URL in a new tab
   const handleNavigateToTheOva = () => {
@@ -40,9 +41,16 @@ export const OvaCard: React.FC<Props> = ({ ova, viewMode = 'grid' }) => {
     a.click();
     document.body.removeChild(a);
 
-    toast.success('Download started 📁', {
-      duration: 5000,
-      description: 'Follow the progress in your browser downloads.'
+    // The browser owns the download from here on, so the user needs to know where to look and what to do with a ZIP
+    showNotice({
+      variant: 'success',
+      title: 'Your download is starting',
+      description: `"${ova.title}" is being saved to your computer as a ZIP file. Big OVAs can take several minutes.`,
+      steps: [
+        "Watch the progress in your browser's downloads: look for a small arrow pointing down (↓) next to the address bar at the top.",
+        'Wait until the browser says the download is complete. If it says the download failed, come back here and press "Download" again.',
+        'Open your Downloads folder, find the ZIP file and unzip it before opening the OVA (on Windows: right-click the file and choose "Extract all…").'
+      ]
     });
     throwConfetti();
 
@@ -53,8 +61,31 @@ export const OvaCard: React.FC<Props> = ({ ova, viewMode = 'grid' }) => {
   // Function to copy the OVA link to the clipboard
   const handleCopyLink = async () => {
     if (!ova) return;
-    await navigator.clipboard.writeText(ova.ovaPath);
-    toast.success('Link copied to clipboard \uD83D\uDD17', { duration: 3000 });
+    try {
+      await navigator.clipboard.writeText(ova.ovaPath);
+    } catch {
+      // The Clipboard API is missing on pages served without HTTPS, and rejects if the browser denies access
+      showNotice({
+        variant: 'error',
+        title: "We couldn't copy the link",
+        description: `Your browser did not let us copy the link to "${ova.title}" automatically. You can still copy it by hand.`,
+        steps: [
+          'Close this message and press "Go to the OVA".',
+          'In the page that opens, click the address bar at the top and press Ctrl + C (Cmd + C on a Mac) to copy the link.'
+        ]
+      });
+      return;
+    }
+
+    showNotice({
+      variant: 'success',
+      title: 'Link copied',
+      description: `The link to "${ova.title}" is saved on your clipboard. It has not been sent to anyone yet.`,
+      steps: [
+        'Open the place where you want to share it: an email, a chat, a document\u2026',
+        'Paste it there: press Ctrl + V (Cmd + V on a Mac), or right-click and choose "Paste".'
+      ]
+    });
   };
 
   // Function to trigger a confetti animation for 2 seconds (skipped when the user asks for reduced motion)

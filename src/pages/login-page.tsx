@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
-import { toast } from 'sonner';
 import { useLocation } from 'wouter';
 
 import LoginForm from '@/components/app/login-form';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotice } from '@/hooks/useNotice';
 
 const LoginPage = () => {
   const [, setLocation] = useLocation();
   const { login, isAuthenticated } = useAuth();
+  const { showNotice } = useNotice();
 
   // Go to the main page as soon as there is a session (already signed in, or just logged in)
   useEffect(() => {
@@ -18,7 +19,11 @@ const LoginPage = () => {
 
   const handleLogin = async (username: string, password: string) => {
     await login({ username, password }); // rejects with a user-facing message, shown by LoginForm
-    toast.success('Welcome! You have successfully logged in.');
+    showNotice({
+      variant: 'success',
+      title: 'Welcome, you are signed in',
+      description: 'Here you can search for OVAs, open them in your browser, or download them to your computer.'
+    });
   };
 
   return (

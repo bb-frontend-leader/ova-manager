@@ -59,21 +59,9 @@ class OvaService {
     }
   }
 
-  async fetchOvaZip(id: string): Promise<{ message: string; data: Blob }> {
-    try {
-      const response = await fetch(`${this.ApiURL}/zip/${id}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return {
-        message: 'Zip generated successfully',
-        data: await response.blob()
-      };
-    } catch (error) {
-      console.error('Error fetching zip from API:', error);
-      throw error instanceof Error ? error : new Error('Error generating zip');
-    }
+  // The ZIP is streamed by the API, so it is downloaded by the browser itself instead of through fetch()
+  getOvaZipUrl(id: string): string {
+    return `${this.ApiURL}/zip/${id}`;
   }
 }
 
